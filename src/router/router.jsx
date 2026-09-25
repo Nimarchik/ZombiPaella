@@ -1,5 +1,5 @@
 import {
-  createBrowserRouter,
+  createHashRouter,
   Navigate,
 } from "react-router-dom";
 
@@ -12,7 +12,7 @@ import Room from "../page/Room/Room";
 import ProtectedRoute from "./ProtectedRoute";
 import Game from "../page/Game/Game";
 
-const router = createBrowserRouter([
+const router = createHashRouter([
   {
     path: "/",
     element: <App />,

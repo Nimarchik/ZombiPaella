@@ -5,9 +5,11 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [react()],
 
-  server: {
-    host: '0.0.0.0',
-    allowedHosts: true,
-  },
+  // server: {
+  //   host: '0.0.0.0',
+  //   allowedHosts: true,
+  // },
+
+  base: "/ZombiPaella/",
   
 })
