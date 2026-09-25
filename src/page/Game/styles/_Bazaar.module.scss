@@ -1,0 +1,358 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000010;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(3, 7, 4, 0.9);
+  backdrop-filter: blur(14px);
+}
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: min(1000px, 94vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding: 22px;
+
+  border: 1px solid rgba(204, 156, 71, 0.45);
+  border-radius: 22px;
+
+  background:
+    radial-gradient(circle at top,
+      rgba(92, 64, 87, 0.22),
+      transparent 34%),
+    linear-gradient(145deg,
+      rgba(28, 38, 27, 0.99),
+      rgba(10, 16, 11, 0.99));
+
+  color: #f3e4bf;
+
+  box-shadow:
+    0 35px 110px rgba(0, 0, 0, 0.92),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: 50px;
+  background-color: rgba(30, 66, 27, 0.712);
+  border-radius: 20px;
+  margin-bottom: 12px;
+  padding: 20px;
+}
+
+.header>div:first-child {
+  min-width: 0;
+}
+
+.headerTitle {
+  margin: 4px 0 4px;
+
+  color: #f5e8c6;
+  font-size: clamp(24px, 3vw, 36px);
+  line-height: 1.05;
+}
+
+.headerSub {
+  margin: 20px 0 0;
+
+  color: rgba(243, 228, 191, 0.7);
+  font-size: 13px;
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: 20px;
+  color: #dcb45f;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.counter {
+  flex: 0 0 auto;
+
+  min-width: 78px;
+  padding: 9px 12px;
+
+  border: 1px solid rgba(220, 180, 95, 0.28);
+  border-radius: 999px;
+
+  background: rgba(12, 18, 13, 0.78);
+
+  color: #f4cc54;
+  font-size: 18px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.counter span {
+  margin-left: 3px;
+
+  color: rgba(243, 228, 191, 0.55);
+  font-size: 12px;
+}
+
+.turnBanner {
+  margin-bottom: 16px;
+  padding: 10px 14px;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.035);
+
+  color: #c9c0a8;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.myTurn {
+  border-color: rgba(244, 204, 84, 0.55);
+
+  background: rgba(112, 86, 28, 0.22);
+
+  color: #ffe69d;
+
+  box-shadow:
+    0 0 24px rgba(244, 204, 84, 0.08);
+}
+
+/*
+ * ВАЖНО:
+ * раньше тут был CSS Grid с колонками 1fr.
+ * При 4 картах они растягивались на всю ширину модалки.
+ *
+ * Теперь используем flex и фиксированную ширину карты.
+ */
+.grid {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+
+  gap: 14px;
+
+  width: 100%;
+  margin: 0;
+  padding: 4px 0 8px;
+}
+
+.gridCard {
+  position: relative;
+  // flex: 0 0 145px;
+  width: 145px;
+  height: auto;
+
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  gap: 7px;
+
+  margin: 0;
+  padding: 7px;
+
+  border: 2px solid transparent;
+  border-radius: 13px;
+
+  background: rgba(7, 12, 8, 0.76);
+  color: #f3e4bf;
+
+  cursor: pointer;
+
+  overflow: visible;
+
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    filter 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.gridCard:hover:not(:disabled) {
+  z-index: 20;
+
+  transform:
+    translateY(-7px) scale(1.035);
+
+  border-color:
+    rgba(244, 204, 84, 0.72);
+
+  filter:
+    brightness(1.08);
+
+  box-shadow:
+    0 16px 28px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(244, 204, 84, 0.12);
+}
+
+.gridCard:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.gridCard img {
+  position: static;
+
+  display: block;
+
+  width: 100%;
+  height: 203px;
+
+  margin: 0;
+
+  object-fit: cover;
+
+  border-radius: 8px;
+
+  box-shadow:
+    0 7px 16px rgba(0, 0, 0, 0.5);
+
+  &:hover {
+    transform: scale(1.8);
+  }
+}
+
+.cardName {
+  display: block;
+
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: #f4e7c4;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.2;
+
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardType {
+  display: block;
+
+  color: rgba(243, 228, 191, 0.52);
+  font-size: 9px;
+  font-weight: 700;
+
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.loading,
+.status,
+.error {
+  margin-top: 14px;
+  padding: 11px 14px;
+
+  border-radius: 12px;
+
+  text-align: center;
+}
+
+.loading,
+.status {
+  background:
+    rgba(255, 255, 255, 0.035);
+
+  color: #d8ceb4;
+}
+
+.error {
+  border:
+    1px solid rgba(255, 110, 91, 0.26);
+
+  background:
+    rgba(111, 34, 29, 0.34);
+
+  color: #ff9e90;
+}
+
+@media (max-width: 800px) {
+  .overlay {
+    padding: 10px;
+  }
+
+  .modal {
+    width: 96vw;
+    max-height: 94vh;
+
+    padding: 15px;
+
+    border-radius: 17px;
+  }
+
+  .header {
+    align-items: center;
+  }
+
+  .header h2 {
+    font-size: 25px;
+  }
+
+  .gridCard {
+    flex-basis: 125px;
+    width: 125px;
+  }
+
+  .gridCard img {
+    height: 175px;
+  }
+}
+
+@media (max-width: 520px) {
+  .header {
+    align-items: flex-start;
+  }
+
+  .header h2 {
+    font-size: 21px;
+  }
+
+  .header p {
+    font-size: 11px;
+  }
+
+  .counter {
+    min-width: 64px;
+    padding: 7px 9px;
+
+    font-size: 15px;
+  }
+
+  .grid {
+    gap: 9px;
+  }
+
+  .gridCard {
+    flex: 0 0 calc(50% - 5px);
+    width: calc(50% - 5px);
+
+    padding: 5px;
+  }
+
+  .gridCard img {
+    width: 100%;
+    height: auto;
+
+    aspect-ratio: 2.5 / 3.5;
+
+    object-fit: cover;
+  }
+}

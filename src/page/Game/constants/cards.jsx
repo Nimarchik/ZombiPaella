@@ -1,0 +1,1 @@
+export const CARD_BACK_PATH = "/back.png";
