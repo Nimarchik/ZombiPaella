@@ -20,7 +20,7 @@
   width: min(1000px, 94vw);
   max-height: 92vh;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
 
   padding: 22px;
 
@@ -70,6 +70,49 @@
 
   color: rgba(243, 228, 191, 0.7);
   font-size: 13px;
+}
+
+.elfs {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit,
+      minmax(150px, 1fr));
+
+  gap: 14px;
+
+  width: 100%;
+
+  max-height: 65vh;
+
+  padding: 8px;
+
+  overflow-y: auto;
+}
+
+
+.elfs>button {
+  min-width: 0;
+}
+
+
+.elfCardImage {
+  display: block;
+
+  width: 100%;
+  max-width: 190px;
+
+  margin: 0 auto;
+
+  border-radius: 9px;
+
+  transition:
+    transform 160ms ease;
+}
+
+
+.elfs>button:hover .elfCardImage {
+  transform: scale(1.08);
 }
 
 .eyebrow {
@@ -355,4 +398,173 @@
 
     object-fit: cover;
   }
+}
+
+.battleTargetCard {
+  margin: 14px auto 18px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+
+  padding: 10px 14px;
+
+  border:
+    1px solid rgba(244, 204, 84, 0.35);
+
+  border-radius: 14px;
+
+  background:
+    rgba(0, 0, 0, 0.2);
+
+  color: #f0dfb8;
+
+  cursor: pointer;
+}
+
+.battleTargetCard>span {
+  color: var(--paella-bright);
+
+  font-size: 11px;
+  font-weight: 900;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.08em;
+}
+
+.battleTargetCard img {
+  width: 90px;
+
+  border-radius: 8px;
+
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.5);
+}
+
+.battleTargetCard strong {
+  max-width: 180px;
+
+  font-size: 13px;
+  text-align: center;
+}
+
+.waitingBattle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.waitingBattleTarget {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  margin-left: 10px;
+  padding: 4px 7px;
+
+  border: 1px solid rgba(244, 204, 84, 0.3);
+
+  border-radius: 8px;
+
+  background:
+    rgba(0, 0, 0, 0.22);
+
+  color: #f4cc54;
+
+  cursor: pointer;
+}
+
+.waitingBattleTarget img {
+  width: 28px;
+
+  border-radius: 4px;
+}
+
+.waitingBattleTarget span {
+  max-width: 120px;
+
+  overflow: hidden;
+
+  font-size: 10px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 950px) {
+
+  .battleTargetCard {
+    margin: 8px auto 10px;
+    padding: 7px 10px;
+  }
+
+  .battleTargetCard img {
+    width: 65px;
+  }
+
+  .waitingBattleTarget img {
+    width: 24px;
+  }
+
+  .waitingBattleTarget span {
+    max-width: 85px;
+    font-size: 8px;
+  }
+}
+
+@media (max-width: 950px) {
+
+  .elfs {
+    grid-template-columns:
+      repeat(auto-fit,
+        minmax(105px, 1fr));
+
+    gap: 8px;
+
+    max-height: 58vh;
+
+    padding: 5px;
+  }
+
+  .elfCardImage {
+    max-width: 145px;
+  }
+
+}
+
+@media (max-width: 1024px) and (orientation: landscape) {
+
+  .elfs {
+    display: flex;
+
+    gap: 10px;
+
+    max-height: none;
+
+    padding:
+      8px 6px 14px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    scroll-snap-type:
+      x proximity;
+  }
+
+  .elfs>button {
+    flex:
+      0 0 125px;
+
+    scroll-snap-align:
+      center;
+  }
+
+  .elfCardImage {
+    width: 115px;
+    max-width: none;
+  }
+
 }

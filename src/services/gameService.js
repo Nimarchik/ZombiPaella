@@ -246,7 +246,10 @@ export async function respondBattle(
 export const getActiveBattle =
   async (gameId) => {
 
-    return await supabase
+    const {
+      data: battle,
+      error: battleError,
+    } = await supabase
       .from("game_battles")
       .select("*")
       .eq(
@@ -258,6 +261,95 @@ export const getActiveBattle =
         "waiting_defense"
       )
       .maybeSingle();
+
+
+    if (battleError) {
+
+      console.error(
+        "GET ACTIVE BATTLE ERROR:",
+        battleError
+      );
+
+      return {
+        data: null,
+        error: battleError,
+      };
+    }
+
+
+    if (!battle) {
+
+      return {
+        data: null,
+        error: null,
+      };
+    }
+
+
+    if (!battle.target_card_id) {
+
+      return {
+        data: battle,
+        error: null,
+      };
+    }
+
+
+    const {
+      data: targetCard,
+      error: targetCardError,
+    } = await supabase
+      .from("game_cards")
+      .select(`
+        id,
+        owner_id,
+        zone,
+
+        card:card_definitions (
+          id,
+          name,
+          type,
+          subtype,
+          is_ingredient,
+          image_path,
+          effect_key
+        )
+      `)
+      .eq(
+        "id",
+        battle.target_card_id
+      )
+      .eq(
+        "game_id",
+        gameId
+      )
+      .maybeSingle();
+
+
+    if (targetCardError) {
+
+      console.error(
+        "GET BATTLE TARGET CARD ERROR:",
+        targetCardError
+      );
+
+      return {
+        data: battle,
+        error: null,
+      };
+    }
+
+
+    return {
+      data: {
+        ...battle,
+
+        target_card:
+          targetCard ?? null,
+      },
+
+      error: null,
+    };
   };
 
 export const getBattleResultDetails =

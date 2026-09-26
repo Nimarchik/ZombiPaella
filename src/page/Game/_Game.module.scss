@@ -31,6 +31,9 @@
 *   SCREEN
 
 *   ========================================= */
+.previewCloseButton {
+  display: none;
+}
 
 .gameScreen {
 
@@ -999,29 +1002,17 @@
 *   ========================================= */
 
 .cardPreviewOverlay {
-
   position: fixed;
-
   inset: 0;
-
   z-index: 999999;
-
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
   padding: 25px;
-
   background: rgba(5, 8, 5, 0.87);
-
   backdrop-filter: blur(14px);
-
   cursor: zoom-out;
-
   animation: previewBackground 0.2s ease;
-
 }
 
 @keyframes previewBackground {
@@ -1537,7 +1528,7 @@
   width: min(700px, 92vw);
 
   padding: 25px;
-
+  height: 800px;
   border-radius: 20px;
 
   border: 1px solid rgba(220, 75, 55, 0.5);
@@ -1549,7 +1540,7 @@
   text-align: center;
 
   box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85);
-
+  overflow: auto;
   animation: battleAppear 0.25s ease;
 
 }
@@ -1660,6 +1651,32 @@
 
   cursor: pointer;
 
+}
+
+.collectionGuards {
+  position: fixed;
+
+  top: 84px;
+  right: 16px;
+
+  z-index: 30;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+
+  max-width: 230px;
+
+  padding: 10px;
+
+  border-radius: 12px;
+
+  background:
+    rgba(15, 15, 20, 0.88);
+
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.28);
 }
 
 .waitingBattle {
@@ -4201,6 +4218,7 @@
   /* ---------- turn ---------- */
   .turnIndicator {
     top: 43%;
+    left: 55%;
     gap: 5px;
     padding: 4px 9px;
     border-radius: 999px;
@@ -4622,6 +4640,8 @@
   }
 
   .targetPreview {
+    display: flex;
+    flex-direction: column;
     width: min(620px, 96vw);
     flex-direction: row;
     gap: 12px;
@@ -4631,6 +4651,106 @@
     width: auto;
     max-width: 32vw;
     max-height: calc(100dvh - 38px);
+  }
+
+  .attackerBattleStatus {
+    position: fixed;
+
+    top: 70px;
+    left: 50%;
+
+    z-index: 10000;
+
+    transform: translateX(-50%);
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 8px 12px;
+
+    border:
+      1px solid rgba(244, 204, 84, 0.35);
+
+    border-radius: 14px;
+
+    background:
+      rgba(10, 15, 10, 0.92);
+
+    backdrop-filter: blur(10px);
+
+    box-shadow:
+      0 10px 30px rgba(0, 0, 0, 0.45);
+  }
+
+
+  .attackerBattleText {
+    color: #f4cc54;
+
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+
+  .attackerBattleTarget {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 4px 8px;
+
+    border:
+      1px solid rgba(244, 204, 84, 0.25);
+
+    border-radius: 9px;
+
+    background:
+      rgba(255, 255, 255, 0.06);
+
+    color: #ead9ae;
+
+    cursor: pointer;
+  }
+
+
+  .attackerBattleTarget img {
+    width: 38px;
+
+    border-radius: 5px;
+  }
+
+
+  .attackerBattleTarget div {
+    display: flex;
+    flex-direction: column;
+
+    text-align: left;
+  }
+
+
+  .attackerBattleTarget span {
+    opacity: 0.55;
+
+    font-size: 9px;
+  }
+
+
+  .attackerBattleTarget strong {
+    max-width: 140px;
+
+    overflow: hidden;
+
+    font-size: 11px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+
+  .attackerBattleWaiting {
+    opacity: 0.65;
+
+    font-size: 10px;
   }
 
   .targetPreviewTitle,
@@ -5037,5 +5157,191 @@
     text-align: center;
     white-space: pre-line;
     pointer-events: auto;
+  }
+}
+
+@media (max-width: 950px) and (pointer: coarse) {
+
+  .previewCloseButton {
+    display: block;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+
+    z-index: 50;
+
+    display: grid;
+    place-items: center;
+
+    width: 38px;
+    height: 38px;
+
+    padding: 0;
+
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 50%;
+
+    background: rgba(8, 12, 8, 0.9);
+    color: #f4cc54;
+
+    font-size: 27px;
+    font-weight: 700;
+    line-height: 1;
+
+    cursor: pointer;
+
+    box-shadow:
+      0 5px 18px rgba(0, 0, 0, 0.5);
+  }
+
+}
+
+@media (max-width: 950px) and (pointer: coarse) {
+
+  .collectionGuards {
+    top: 70%;
+    right: 8px;
+
+    max-width: none;
+
+    flex-direction: row;
+    align-items: center;
+
+    gap: 5px;
+
+    padding: 5px 6px;
+
+    border-radius: 9px;
+
+    background:
+      rgba(10, 10, 14, 0.76);
+
+    backdrop-filter: blur(6px);
+  }
+
+
+  .collectionGuards>strong {
+    display: none;
+  }
+
+  .collectionGuards button img {
+    width: 36px !important;
+    height: 36px !important;
+
+    object-fit: cover;
+
+    border-radius: 6px !important;
+  }
+
+
+  .collectionGuards button {
+    width: auto !important;
+    min-width: 90px !important;
+    max-width: 145px !important;
+    height: 42px !important;
+
+    display: flex !important;
+    align-items: center !important;
+
+    gap: 5px !important;
+
+    padding: 3px 7px 3px 3px !important;
+
+    border-radius: 8px !important;
+
+    overflow: hidden;
+  }
+
+
+  .collectionGuards button>span {
+    display: flex !important;
+    flex-direction: column !important;
+
+    min-width: 0;
+
+    gap: 0 !important;
+  }
+
+
+  /* Показываем владельца защиты */
+  .collectionGuards button>span>strong {
+    display: block !important;
+
+    max-width: 90px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: 11px;
+    line-height: 1.1;
+  }
+
+
+  /* Длинное описание на телефоне не показываем */
+  .collectionGuards button>span>small {
+    display: none !important;
+  }
+
+}
+
+.reactionCounterCard {
+  margin: 10px auto;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+
+  width: fit-content;
+
+  padding: 9px 12px;
+
+  border:
+    1px solid rgba(244, 204, 84, 0.32);
+
+  border-radius: 12px;
+
+  background:
+    rgba(0, 0, 0, 0.2);
+
+  text-align: center;
+}
+
+.reactionCounterCard img {
+  width: 85px;
+
+  border-radius: 7px;
+
+  box-shadow:
+    0 7px 18px rgba(0, 0, 0, 0.45);
+}
+
+.reactionCounterCard>span {
+  opacity: 0.65;
+
+  font-size: 10px;
+}
+
+.reactionCounterCard strong {
+  color: #f4cc54;
+
+  font-size: 12px;
+}
+
+.reactionCounterCard small {
+  opacity: 0.7;
+
+  font-size: 9px;
+}
+
+@media (max-width: 950px) {
+
+  .reactionCounterCard {
+    padding: 6px 9px;
+  }
+
+  .reactionCounterCard img {
+    width: 62px;
   }
 }
