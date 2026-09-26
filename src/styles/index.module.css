@@ -2479,6 +2479,171 @@ ol {
     padding: 15px;
   }
 }
+/* =========================================
+   ACTIVE GAME EXIT
+   ========================================= */
+.gameExitControls {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  z-index: 180;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.leaveGameButton,
+.endGameButton {
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 12px;
+  padding: 9px 13px;
+  background: rgba(11, 15, 12, 0.78);
+  color: #f3ead5;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  transition: transform 0.16s ease, opacity 0.16s ease, border-color 0.16s ease;
+}
+
+.leaveGameButton:hover:not(:disabled),
+.endGameButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.endGameButton {
+  border-color: rgba(225, 86, 71, 0.28);
+  color: #ffd8d1;
+  background: rgba(68, 20, 17, 0.76);
+}
+
+.leaveGameButton:disabled,
+.endGameButton:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.gameExitError {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 290px;
+  padding: 8px 10px;
+  border: 1px solid rgba(239, 102, 81, 0.35);
+  border-radius: 10px;
+  background: rgba(45, 13, 10, 0.92);
+  color: #ffd6cf;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.gameExitOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(2, 5, 3, 0.72);
+  backdrop-filter: blur(8px);
+}
+
+.gameExitModal {
+  width: min(440px, 100%);
+  padding: 28px;
+  border: 1px solid rgba(241, 218, 167, 0.18);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(31, 39, 31, 0.98), rgba(15, 20, 16, 0.98));
+  color: #f4ead4;
+  text-align: center;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.56), inset 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.gameExitIcon {
+  margin-bottom: 12px;
+  font-size: 36px;
+}
+
+.gameExitModal h2 {
+  margin: 0 0 10px;
+  font-size: 24px;
+}
+
+.gameExitModal p {
+  margin: 0;
+  color: rgba(244, 234, 212, 0.72);
+  line-height: 1.55;
+}
+
+.gameExitModalError {
+  margin-top: 14px;
+  padding: 9px 11px;
+  border: 1px solid rgba(239, 102, 81, 0.32);
+  border-radius: 10px;
+  background: rgba(75, 22, 17, 0.48);
+  color: #ffd1ca;
+  font-size: 13px;
+}
+
+.gameExitModalActions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.gameExitCancelButton,
+.gameExitConfirmButton {
+  min-width: 125px;
+  border: 0;
+  border-radius: 12px;
+  padding: 11px 16px;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.gameExitCancelButton {
+  background: rgba(255, 255, 255, 0.08);
+  color: #eee3cc;
+}
+
+.gameExitConfirmButton {
+  background: #9e3d32;
+  color: #fff8f5;
+}
+
+.gameExitCancelButton:disabled,
+.gameExitConfirmButton:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+@media (max-width: 700px) {
+  .gameExitControls {
+    top: 10px;
+    right: 10px;
+    gap: 5px;
+  }
+  .leaveGameButton,
+  .endGameButton {
+    padding: 7px 9px;
+    font-size: 11px;
+  }
+  .gameExitModal {
+    padding: 22px 18px;
+  }
+  .gameExitModalActions {
+    flex-direction: column;
+  }
+  .gameExitCancelButton,
+  .gameExitConfirmButton {
+    width: 100%;
+  }
+}
 .overlay {
   position: fixed;
   inset: 0;

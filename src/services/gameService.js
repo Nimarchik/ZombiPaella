@@ -1622,3 +1622,73 @@ export async function playTemporaryTreasure(
     error: null,
   };
 }
+
+// ============================================================
+// ACTIVE GAME EXIT
+// ============================================================
+
+export async function getRoomInfo(roomId) {
+  return await supabase
+    .from("rooms")
+    .select(`
+      id,
+      host_id,
+      status
+    `)
+    .eq("id", roomId)
+    .single();
+}
+
+
+export async function leaveActiveGame(gameId) {
+  const { data, error } = await supabase.rpc(
+    "leave_active_game",
+    {
+      p_game_id: gameId,
+    }
+  );
+
+  if (error) {
+    console.error(
+      "LEAVE ACTIVE GAME ERROR:",
+      error
+    );
+
+    return {
+      result: null,
+      error,
+    };
+  }
+
+  return {
+    result: data,
+    error: null,
+  };
+}
+
+
+export async function endActiveGame(gameId) {
+  const { data, error } = await supabase.rpc(
+    "end_active_game",
+    {
+      p_game_id: gameId,
+    }
+  );
+
+  if (error) {
+    console.error(
+      "END ACTIVE GAME ERROR:",
+      error
+    );
+
+    return {
+      result: null,
+      error,
+    };
+  }
+
+  return {
+    result: data,
+    error: null,
+  };
+}

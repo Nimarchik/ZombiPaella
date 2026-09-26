@@ -12743,7 +12743,7 @@ export const GameMechanicsUI = ({
               >
                 {battleLoading
                   ? "Очікуємо..."
-                  : "Не захищатися"}
+                  : "Подарувати"}
               </button>
 
 
