@@ -1,0 +1,1 @@
+export { useRiskyDilemmaMechanics } from "./useRiskyDilemmaMechanics";

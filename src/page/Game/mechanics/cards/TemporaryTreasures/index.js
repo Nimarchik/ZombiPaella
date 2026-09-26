@@ -1,0 +1,1 @@
+export { useTemporaryTreasuresMechanics } from "./useTemporaryTreasuresMechanics";

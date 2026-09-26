@@ -1,12 +1,49 @@
 .room {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background-image: url('/public/background.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
   padding: 100px 0;
+  z-index: 1;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.60);
+    z-index: -1;
+  }
 }
 
 .roomInner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin: 0 auto;
   gap: 20px;
+  padding: 20px;
+  box-shadow: 0 0 20px $black;
+  border-radius: 20px;
+  z-index: 1;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: $black;
+    border-radius: 20px;
+    filter: blur(10px);
+    opacity: 0.5;
+    z-index: -1;
+  }
 }
 
 .roomInnerTitle {
@@ -63,7 +100,7 @@
   fill: $white;
   transition: all .4s;
 
-  
+
 }
 
 .roomInnerPlayersList {
@@ -153,6 +190,7 @@
 .profileCreateLobbyClose {
   background-color: red;
   border-color: rgb(223, 64, 64);
+  font-size: 13px;
 
   box-shadow:
     inset 0 30px 30px -15px rgba(196, 45, 45, 0.1),
