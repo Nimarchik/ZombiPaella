@@ -1,0 +1,10 @@
+{
+	"name": "ZombiPaella",
+	"short_name": "ZombiPaella",
+	"start_url": "/ZombiPaella/",
+	"scope": "/ZombiPaella/",
+	"display": "standalone",
+	"orientation": "landscape",
+	"background_color": "#101611",
+	"theme_color": "#101611"
+}
