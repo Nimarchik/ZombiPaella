@@ -1,1 +1,0 @@
-export { useReactionsMechanics } from "./useReactionsMechanics";

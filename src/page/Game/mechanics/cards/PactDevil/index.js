@@ -1,1 +1,0 @@
-export { usePactDevilMechanics } from "./usePactDevilMechanics";

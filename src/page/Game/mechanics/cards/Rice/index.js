@@ -1,1 +1,0 @@
-export { useRiceMechanics } from "./useRiceMechanics";

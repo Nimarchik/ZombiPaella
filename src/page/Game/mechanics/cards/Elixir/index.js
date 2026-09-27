@@ -1,1 +1,0 @@
-export { useElixirMechanics } from "./useElixirMechanics";

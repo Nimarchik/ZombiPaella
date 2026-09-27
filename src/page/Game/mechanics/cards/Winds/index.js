@@ -1,1 +1,0 @@
-export { useWindsMechanics } from "./useWindsMechanics";

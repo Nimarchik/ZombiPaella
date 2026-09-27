@@ -1,1 +1,0 @@
-export { useStatueMechanics } from "./useStatueMechanics";

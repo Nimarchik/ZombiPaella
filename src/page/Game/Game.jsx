@@ -91,57 +91,35 @@ import style from "../../styles/index.module.css";
 
 
 const getOpponentPosition = (
-
   index,
-
   total
-
 ) => {
 
   if (total === 1) {
-
     return "topCenter";
-
   }
 
   if (total === 2) {
-
     return [
-
-      "topLeft",
-
       "topRight",
-
+      "topLeft",
     ][index];
-
   }
 
   if (total === 3) {
-
     return [
-
-      "leftCenter",
-
-      "topCenter",
-
       "rightCenter",
-
+      "topCenter",
+      "leftCenter",
     ][index];
-
   }
 
   return [
-
-    "leftCenter",
-
-    "topLeft",
-
-    "topRight",
-
     "rightCenter",
-
+    "topRight",
+    "topLeft",
+    "leftCenter",
   ][index];
-
 };
 
 
@@ -951,25 +929,62 @@ const Game = () => {
   // ============================================
 
   const opponents =
-
     useMemo(() => {
+      if (
+        !currentUser?.id ||
+        players.length === 0
+      ) {
+        return [];
+      }
 
-      return players.filter(
-
-        player =>
-
-          player.player_id !==
-
-          currentUser?.id
-
+      const sortedPlayers = [
+        ...players,
+      ].sort(
+        (a, b) =>
+          Number(a.seat ?? 0) -
+          Number(b.seat ?? 0)
       );
 
+      const myIndex =
+        sortedPlayers.findIndex(
+          player =>
+            player.player_id ===
+            currentUser.id
+        );
+
+      if (myIndex === -1) {
+        return sortedPlayers.filter(
+          player =>
+            player.player_id !==
+            currentUser.id
+        );
+      }
+
+      const clockwisePlayers = [];
+
+      for (
+        let offset = 1;
+        offset < sortedPlayers.length;
+        offset += 1
+      ) {
+
+        const index =
+          (
+            myIndex +
+            offset
+          ) %
+          sortedPlayers.length;
+
+        clockwisePlayers.push(
+          sortedPlayers[index]
+        );
+      }
+
+      return clockwisePlayers;
+
     }, [
-
       players,
-
       currentUser?.id,
-
     ]);
 
 

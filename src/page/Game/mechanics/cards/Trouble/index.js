@@ -1,1 +1,0 @@
-export { useTroubleMechanics } from "./useTroubleMechanics";

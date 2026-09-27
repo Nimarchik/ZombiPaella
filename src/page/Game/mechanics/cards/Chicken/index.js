@@ -1,1 +1,0 @@
-export { useChickenMechanics } from "./useChickenMechanics";
