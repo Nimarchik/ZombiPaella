@@ -847,7 +847,7 @@
 
   left: 50%;
 
-  bottom: -50px;
+  bottom: -30px;
 
   width: 84%;
 
@@ -3992,6 +3992,90 @@
   height: 26px !important;
 
   z-index: 10 !important;
+}
+
+/* =========================================================
+   SPECIAL EVENT FEED
+   Temporary public chain of special-card events.
+   No inline styles: all presentation lives here.
+   ========================================================= */
+
+.specialEventFeed {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  z-index: 1500;
+
+  width: min(420px, calc(100vw - 36px));
+
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+
+  pointer-events: none;
+}
+
+.specialEventFeedItem {
+  padding: 10px 13px;
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+
+  background: rgba(10, 10, 14, 0.88);
+  backdrop-filter: blur(12px);
+
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.35;
+
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+
+  animation: specialEventFeedIn 180ms ease-out;
+}
+
+.protectionImg {
+  display: block;
+  width: 130px;
+  max-width: 40vw;
+  border-radius: 7px;
+  margin: 0 auto;
+}
+
+.listCardBazar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,
+      minmax(90px, 1fr));
+  gap: 12px;
+  max-height: 42vh;
+  overflow-y: auto;
+  padding: 8px 4px;
+}
+
+@keyframes specialEventFeedIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 700px) {
+  .specialEventFeed {
+    top: 10px;
+    left: 10px;
+
+    width: calc(100vw - 20px);
+  }
+
+  .specialEventFeedItem {
+    padding: 9px 11px;
+
+    font-size: 12px;
+  }
 }
 
 

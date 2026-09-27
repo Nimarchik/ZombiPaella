@@ -90,10 +90,30 @@ export const useGameMechanics = ({
     setSpecialEvent,
   ] = useState(null);
 
+  const [
+    specialEventFeed,
+    setSpecialEventFeed,
+  ] = useState([]);
+
   const closeSpecialEvent =
     useCallback(() => {
       setSpecialEvent(null);
     }, []);
+
+
+  useEffect(() => {
+    if (specialEventFeed.length === 0) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setSpecialEventFeed([]);
+    }, 8000);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [specialEventFeed]);
 
   // =========================================================
   // BATTLE STATE
@@ -474,13 +494,7 @@ export const useGameMechanics = ({
       setAlmsMenuOpen(false);
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
-
-
-      await loadGameState();
+      await refreshAfterSpecialAction();
       await loadTurnActionState();
       await loadMyIngredientCount();
 
@@ -736,10 +750,7 @@ export const useGameMechanics = ({
       setSquibReveal(null);
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
+      await refreshAfterSpecialAction();
 
       await loadActiveBattle(
         game.id
@@ -1086,9 +1097,28 @@ export const useGameMechanics = ({
               payload.new
             );
 
-            setSpecialEvent(
-              payload.new ?? null
-            );
+            const event =
+              payload.new ?? null;
+
+            setSpecialEvent(event);
+
+            if (event) {
+              setSpecialEventFeed(
+                current => {
+
+                  const withoutDuplicate =
+                    current.filter(
+                      item =>
+                        item.id !== event.id
+                    );
+
+                  return [
+                    event,
+                    ...withoutDuplicate,
+                  ].slice(0, 6);
+                }
+              );
+            }
           }
         )
 
@@ -1109,9 +1139,28 @@ export const useGameMechanics = ({
               payload.new
             );
 
-            setSpecialEvent(
-              payload.new ?? null
-            );
+            const event =
+              payload.new ?? null;
+
+            setSpecialEvent(event);
+
+            if (event) {
+              setSpecialEventFeed(
+                current => {
+
+                  const withoutDuplicate =
+                    current.filter(
+                      item =>
+                        item.id !== event.id
+                    );
+
+                  return [
+                    event,
+                    ...withoutDuplicate,
+                  ].slice(0, 6);
+                }
+              );
+            }
           }
         )
 
@@ -1563,10 +1612,7 @@ export const useGameMechanics = ({
       setDefenseSupportCardIds([]);
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
+      await refreshAfterSpecialAction();
 
       const updatedGame =
         await loadGameState();
@@ -1649,10 +1695,7 @@ export const useGameMechanics = ({
       );
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
+      await refreshAfterSpecialAction();
 
       const updatedGame =
         await loadGameState();
@@ -1725,12 +1768,7 @@ export const useGameMechanics = ({
       );
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
-
-      await loadGameState();
+      await refreshAfterSpecialAction();
 
 
       setSquibLoading(false);
@@ -1987,12 +2025,7 @@ export const useGameMechanics = ({
       setAlmsMenuOpen(false);
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
-
-      await loadGameState();
+      await refreshAfterSpecialAction();
       await loadFortresses();
 
 
@@ -2200,12 +2233,7 @@ export const useGameMechanics = ({
       setPreviewCard(null);
       setAlmsMenuOpen(false);
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
-
-      await loadGameState();
+      await refreshAfterSpecialAction();
       await loadStatues();
 
       setStatueLoading(false);
@@ -2519,11 +2547,11 @@ export const useGameMechanics = ({
       setPactTargetPlayerId(null);
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
-
+      // await refreshCards(
+      //   game.id,
+      //   currentUser.id
+      // );
+      await refreshAfterSpecialAction();
 
       const updatedGame =
         await loadGameState();
@@ -2684,10 +2712,7 @@ export const useGameMechanics = ({
       setWindsTargetTreasureId(null);
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
+      await refreshAfterSpecialAction();
 
 
       const updatedGame =
@@ -2930,10 +2955,7 @@ export const useGameMechanics = ({
       setSilkTradeTargetIds([]);
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
+      await refreshAfterSpecialAction();
 
 
       const updatedGame =
@@ -3073,10 +3095,7 @@ export const useGameMechanics = ({
       setAlmsMenuOpen(false);
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
+      await refreshAfterSpecialAction();
 
 
       const updatedGame =
@@ -3587,12 +3606,7 @@ export const useGameMechanics = ({
 
       setBattleGuardChoice(null);
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
-
-      await loadGameState();
+      await refreshAfterSpecialAction();
       await loadFortresses();
       await loadStatues();
 
@@ -3743,10 +3757,7 @@ export const useGameMechanics = ({
         setTroubleCardId(null);
 
 
-        await refreshCards(
-          game.id,
-          currentUser.id
-        );
+        await refreshAfterSpecialAction();
 
         await loadGameState();
         await loadActiveBattle(
@@ -3823,12 +3834,7 @@ export const useGameMechanics = ({
       setSelectedTarget(null);
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
-
-      await loadGameState();
+      await refreshAfterSpecialAction();
 
 
       setBattleLoading(false);
@@ -3903,10 +3909,7 @@ export const useGameMechanics = ({
         result?.reaction_pending
       ) {
 
-        await refreshCards(
-          game.id,
-          currentUser.id
-        );
+        await refreshAfterSpecialAction();
 
         await loadGameState();
 
@@ -3925,12 +3928,7 @@ export const useGameMechanics = ({
         battleId
       );
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
-
-      await loadGameState();
+      await refreshAfterSpecialAction();
 
       if (
         result?.guard_choice_pending
@@ -3999,10 +3997,7 @@ export const useGameMechanics = ({
       );
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
+      await refreshAfterSpecialAction();
 
       await loadBattleResult(
         battleResult.battle_id
@@ -4143,12 +4138,7 @@ export const useGameMechanics = ({
       setRiskyDilemmaSelectedIds([]);
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
-
-      await loadGameState();
+      await refreshAfterSpecialAction();
 
 
       setRiskyDilemmaLoading(false);
@@ -4251,12 +4241,7 @@ export const useGameMechanics = ({
       setBatSelectingTreasure(false);
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
-
-      await loadGameState();
+      await refreshAfterSpecialAction();
 
 
       setBatLoading(false);
@@ -4326,10 +4311,7 @@ export const useGameMechanics = ({
       setAlmsMenuOpen(false);
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
+      await refreshAfterSpecialAction();
 
       const updatedGame =
         await loadGameState();
@@ -4600,12 +4582,7 @@ export const useGameMechanics = ({
       setAlmsMenuOpen(false);
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
-
-      await loadGameState();
+      await refreshAfterSpecialAction();
 
 
       setChickenLoading(false);
@@ -4712,12 +4689,7 @@ export const useGameMechanics = ({
       setChickenTargets([]);
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
-
-      await loadGameState();
+      await refreshAfterSpecialAction();
 
 
       setChickenLoading(false);
@@ -4877,12 +4849,7 @@ export const useGameMechanics = ({
       setAlmsMenuOpen(false);
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
-
-      await loadGameState();
+      await refreshAfterSpecialAction();
 
 
       setElfLoading(false);
@@ -4944,12 +4911,7 @@ export const useGameMechanics = ({
       setElfSession(null);
       setElfSelectedCardId(null);
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
-
-      await loadGameState();
+      await refreshAfterSpecialAction();
 
 
       setElfLoading(false);
@@ -5114,12 +5076,7 @@ export const useGameMechanics = ({
       setAlmsMenuOpen(false);
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
-
-      await loadGameState();
+      await refreshAfterSpecialAction();
 
 
       setElixirLoading(false);
@@ -5282,10 +5239,7 @@ export const useGameMechanics = ({
       setAlmsMenuOpen(false);
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
+      await refreshAfterSpecialAction();
 
       const updatedGame =
         await loadGameState();
@@ -5368,10 +5322,7 @@ export const useGameMechanics = ({
       setAlmsMenuOpen(false);
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
+      await refreshAfterSpecialAction();
 
       const updatedGame =
         await loadGameState();
@@ -5498,6 +5449,43 @@ export const useGameMechanics = ({
       [
         game?.id,
         currentUser?.id,
+      ]
+    );
+
+  const refreshAfterSpecialAction =
+    useCallback(
+      async () => {
+
+        if (
+          !game?.id ||
+          !currentUser?.id
+        ) {
+          return null;
+        }
+
+        await refreshCards(
+          game.id,
+          currentUser.id
+        );
+
+        const updatedGame =
+          await loadGameState();
+
+        // Always ask the server for the active energy reaction.
+        // Some special-card flows move the DB phase to energy_reaction
+        // before the local `game` prop has updated. Waiting only for
+        // updatedGame?.phase can therefore leave the modal unopened.
+        await loadEnergyReaction();
+
+        return updatedGame ?? null;
+
+      },
+      [
+        game?.id,
+        currentUser?.id,
+        refreshCards,
+        loadGameState,
+        loadEnergyReaction,
       ]
     );
 
@@ -5686,12 +5674,7 @@ export const useGameMechanics = ({
       );
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
-
-      await loadGameState();
+      await refreshAfterSpecialAction();
 
 
       if (
@@ -5773,10 +5756,7 @@ export const useGameMechanics = ({
           battleId
         );
 
-        await refreshCards(
-          game.id,
-          currentUser.id
-        );
+        await refreshAfterSpecialAction();
 
         await loadGameState();
 
@@ -5982,12 +5962,7 @@ export const useGameMechanics = ({
       setUltraprotectionDiscardIds([]);
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
-
-      await loadGameState();
+      await refreshAfterSpecialAction();
 
       await loadEnergyReaction();
       await loadBattleReaction();
@@ -6051,12 +6026,7 @@ export const useGameMechanics = ({
       );
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
-
-      await loadGameState();
+      await refreshAfterSpecialAction();
 
       await loadEnergyReaction();
       await loadBattleReaction();
@@ -6141,12 +6111,7 @@ export const useGameMechanics = ({
       setUltraprotectionDiscardIds([]);
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
-
-      await loadGameState();
+      await refreshAfterSpecialAction();
 
       await loadEnergyReaction();
       await loadBattleReaction();
@@ -6277,10 +6242,7 @@ export const useGameMechanics = ({
             }
 
 
-            await refreshCards(
-              gameId,
-              currentUser.id
-            );
+            await refreshAfterSpecialAction();
 
             await loadGameState();
             await loadFortresses();
@@ -6478,12 +6440,7 @@ export const useGameMechanics = ({
       setAlmsMenuOpen(false);
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
-
-      await loadGameState();
+      await refreshAfterSpecialAction();
       await loadBazaar();
 
 
@@ -6543,12 +6500,7 @@ export const useGameMechanics = ({
       );
 
 
-      await refreshCards(
-        game.id,
-        currentUser.id
-      );
-
-      await loadGameState();
+      await refreshAfterSpecialAction();
       await loadBazaar();
 
 
@@ -6766,10 +6718,7 @@ export const useGameMechanics = ({
               gameId
             );
 
-            await refreshCards(
-              gameId,
-              currentUser.id
-            );
+            await refreshAfterSpecialAction();
 
             await loadGameState();
             await loadFortresses();
@@ -6811,6 +6760,7 @@ export const useGameMechanics = ({
 
     specialEvent,
     closeSpecialEvent,
+    specialEventFeed,
 
     // battle
     activeBattle,

@@ -23,6 +23,7 @@ export const GameMechanicsUI = ({
   const {
     specialEvent,
     closeSpecialEvent,
+    specialEventFeed,
 
     attackMode,
     groupOpenAttack,
@@ -305,6 +306,142 @@ export const GameMechanicsUI = ({
       );
     };
 
+  const getSpecialEventText =
+    event => {
+
+      if (!event) {
+        return "";
+      }
+
+      const payload =
+        event.payload ?? {};
+
+      const actorName =
+        getPlayerName(
+          event.actor_id
+        );
+
+      const cardName =
+        payload.card_name ??
+        getSpecialCardName(
+          event.card_definition_id
+        );
+
+
+      // =================================
+      // COUNTER
+      // B перебив A
+      // =================================
+
+      if (
+        payload.context ===
+        "energy_counter"
+      ) {
+
+        const targetActorId =
+          payload.target_actor_id ??
+          event.target_player_id ??
+          null;
+
+        const targetName =
+          targetActorId
+            ? getPlayerName(
+              targetActorId
+            )
+            : "суперника";
+
+        const targetCardName =
+          getSpecialCardName(
+            payload
+              .target_definition_id
+          );
+
+
+        return (
+          `🛡 ${actorName} перебив ` +
+          `${targetName} картою ` +
+          `«${cardName}» ` +
+          `(проти «${targetCardName}»)`
+        );
+      }
+
+
+      // =================================
+      // BAT
+      // =================================
+
+      if (
+        event.card_definition_id ===
+        "bat"
+      ) {
+
+        const targetId =
+          event.target_player_id ??
+          payload.target_owner_id ??
+          null;
+
+        const targetName =
+          targetId
+            ? getPlayerName(
+              targetId
+            )
+            : "суперника";
+
+        const treasureName =
+          payload.target_name ??
+          "скарб";
+
+
+        return (
+          `🦇 ${actorName} використав ` +
+          `«${cardName}» і намагається ` +
+          `викрасти «${treasureName}» ` +
+          `у ${targetName}`
+        );
+      }
+
+
+      // =================================
+      // BLOCKED
+      // =================================
+
+      if (
+        event.event_type ===
+        "blocked" ||
+        payload.blocked === true
+      ) {
+        return (
+          `❌ «${cardName}» гравця ` +
+          `${actorName} заблоковано`
+        );
+      }
+
+
+      // =================================
+      // RESOLVED
+      // =================================
+
+      if (
+        event.event_type ===
+        "resolved"
+      ) {
+        return (
+          `✅ «${cardName}» гравця ` +
+          `${actorName} спрацював`
+        );
+      }
+
+
+      // =================================
+      // NORMAL SPECIAL
+      // =================================
+
+      return (
+        `⚡ ${actorName} використав ` +
+        `«${cardName}»`
+      );
+    };
+
 
   const currentEnergyCard =
     energyReaction?.energy_card ??
@@ -360,6 +497,26 @@ export const GameMechanicsUI = ({
   return (
 
     <>
+
+
+      {/* ================================= */}
+      {/* SPECIAL EVENT CHAIN */}
+      {/* ================================= */}
+
+      {specialEventFeed?.length > 0 && (
+        <div className={style.specialEventFeed}>
+          {[...specialEventFeed]
+            .reverse()
+            .map(event => (
+              <div
+                key={event.id}
+                className={style.specialEventFeedItem}
+              >
+                {getSpecialEventText(event)}
+              </div>
+            ))}
+        </div>
+      )}
 
       {/* ================================= */}
       {/* PUBLIC SPECIAL EVENT */}
@@ -2602,270 +2759,242 @@ export const GameMechanicsUI = ({
         elixirCardId && (
 
           <div
-            className={
-              style.overlay
-            }
+            className={`${style.overlay} ${style.elixirOverlay}`}
           >
 
             <div
-              className={
-                style.modal
-              }
+              className={`${style.modal} ${style.elixirModal}`}
             >
-
-              <span
-                className={
-                  style.eyebrow
-                }
-              >
-                СПЕЦІАЛЬНА КАРТА
-              </span>
-
 
               <div
                 className={
-                  style.header
+                  style.elixirTop
                 }
               >
 
-                <h2
+                <span
                   className={
-                    style.headerTitle
+                    style.eyebrow
                   }
                 >
-                  🧪 Духовний еліксир
-                </h2>
+                  СПЕЦІАЛЬНА КАРТА
+                </span>
 
 
                 <div
                   className={
-                    style.counter
+                    style.header
                   }
                 >
-                  {
-                    elixirSelectedCardId
-                      ? 1
-                      : 0
-                  }
-                  <span>/1</span>
-                </div>
 
-              </div>
-
-
-              <p
-                className={
-                  style.headerSub
-                }
-              >
-                Обери 1 бойову карту
-                з кладовища.
-              </p>
-
-
-              {elixirOptions.length > 0 ? (
-
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns:
-                      "repeat(auto-fit, minmax(110px, 1fr))",
-                    gap: "14px",
-                    maxHeight: "58vh",
-                    overflowY: "auto",
-                    padding: "8px 4px",
-                  }}
-                >
-
-                  {elixirOptions.map(
-                    card => {
-
-                      const selected =
-                        elixirSelectedCardId ===
-                        card.game_card_id;
-
-
-                      return (
-
-                        <button
-                          key={
-                            card.game_card_id
-                          }
-
-                          type="button"
-
-                          disabled={
-                            elixirLoading
-                          }
-
-                          onClick={() =>
-                            setElixirSelectedCardId(
-                              card.game_card_id
-                            )
-                          }
-
-                          style={{
-                            position: "relative",
-                            padding: "8px",
-                            borderRadius: "12px",
-                            border:
-                              selected
-                                ? "3px solid #fff"
-                                : "1px solid rgba(255,255,255,.25)",
-                            background:
-                              selected
-                                ? "rgba(255,255,255,.14)"
-                                : "rgba(0,0,0,.16)",
-                            color: "white",
-                            cursor:
-                              elixirLoading
-                                ? "default"
-                                : "pointer",
-                            transform:
-                              selected
-                                ? "translateY(-6px)"
-                                : "none",
-                            transition:
-                              "transform 160ms ease, background 160ms ease",
-                          }}
-                        >
-
-                          <img
-                            src={
-                              getCardImageUrl(
-                                card.image_path
-                              )
-                            }
-
-                            alt={
-                              card.name
-                            }
-
-                            style={{
-                              display: "block",
-                              width: "100%",
-                              maxWidth: "135px",
-                              margin: "0 auto",
-                              borderRadius: "8px",
-                            }}
-                          />
-
-
-                          <strong
-                            style={{
-                              display: "block",
-                              marginTop: "8px",
-                              fontSize: "12px",
-                              lineHeight: 1.25,
-                            }}
-                          >
-                            {card.name}
-                          </strong>
-
-
-                          {selected && (
-
-                            <span
-                              style={{
-                                position:
-                                  "absolute",
-                                top: "12px",
-                                right: "12px",
-                                width: "28px",
-                                height: "28px",
-                                display: "grid",
-                                placeItems:
-                                  "center",
-                                borderRadius:
-                                  "50%",
-                                background:
-                                  "rgba(0,0,0,.8)",
-                                color: "#fff",
-                                fontWeight:
-                                  800,
-                              }}
-                            >
-                              ✓
-                            </span>
-
-                          )}
-
-                        </button>
-
-                      );
+                  <h2
+                    className={
+                      style.headerTitle
                     }
-                  )}
+                  >
+                    🧪 Духовний еліксир
+                  </h2>
+
+
+                  <div
+                    className={
+                      style.counter
+                    }
+                  >
+                    {
+                      elixirSelectedCardId
+                        ? 1
+                        : 0
+                    }
+                    <span>/1</span>
+                  </div>
 
                 </div>
 
-              ) : (
 
                 <p
                   className={
                     style.headerSub
                   }
                 >
-                  У кладовищі немає
-                  бойових карт.
+                  Обери 1 бойову карту
+                  з кладовища.
                 </p>
 
-              )}
+              </div>
 
 
-              {elixirError && (
+              <div
+                className={
+                  style.elixirContent
+                }
+              >
 
-                <p
+                {elixirOptions.length > 0 ? (
+
+                  <div
+                    className={
+                      style.elixirGrid
+                    }
+                  >
+
+                    {elixirOptions.map(
+                      card => {
+
+                        const selected =
+                          elixirSelectedCardId ===
+                          card.game_card_id;
+
+
+                        return (
+
+                          <button
+                            key={
+                              card.game_card_id
+                            }
+
+                            type="button"
+
+                            disabled={
+                              elixirLoading
+                            }
+
+                            onClick={() =>
+                              setElixirSelectedCardId(
+                                card.game_card_id
+                              )
+                            }
+
+                            className={`${style.elixirCard} ${selected
+                              ? style.elixirCardSelected
+                              : ""
+                              }`}
+                          >
+
+                            <img
+                              src={
+                                getCardImageUrl(
+                                  card.image_path
+                                )
+                              }
+
+                              alt={
+                                card.name
+                              }
+
+                              className={
+                                style.elixirCardImage
+                              }
+                            />
+
+
+                            <strong
+                              className={
+                                style.elixirCardName
+                              }
+                            >
+                              {card.name}
+                            </strong>
+
+
+                            {selected && (
+
+                              <span
+                                className={
+                                  style.elixirCheck
+                                }
+                              >
+                                ✓
+                              </span>
+
+                            )}
+
+                          </button>
+
+                        );
+                      }
+                    )}
+
+                  </div>
+
+                ) : (
+
+                  <p
+                    className={
+                      style.headerSub
+                    }
+                  >
+                    У кладовищі немає
+                    бойових карт.
+                  </p>
+
+                )}
+
+
+                {elixirError && (
+
+                  <p
+                    className={
+                      style.battleError
+                    }
+                  >
+                    {elixirError}
+                  </p>
+
+                )}
+
+              </div>
+
+
+              <div
+                className={
+                  style.elixirActions
+                }
+              >
+
+                <button
+                  type="button"
+
                   className={
-                    style.battleError
+                    style.attackButton
+                  }
+
+                  disabled={
+                    elixirLoading ||
+                    !elixirSelectedCardId
+                  }
+
+                  onClick={
+                    handlePlayElixir
                   }
                 >
-                  {elixirError}
-                </p>
-
-              )}
-
-
-              <button
-                type="button"
-
-                className={
-                  style.attackButton
-                }
-
-                disabled={
-                  elixirLoading ||
-                  !elixirSelectedCardId
-                }
-
-                onClick={
-                  handlePlayElixir
-                }
-              >
-                {
-                  elixirLoading
-                    ? "Повертаємо карту..."
-                    : "🧪 Взяти карту"
-                }
-              </button>
+                  {
+                    elixirLoading
+                      ? "Повертаємо карту..."
+                      : "🧪 Взяти карту"
+                  }
+                </button>
 
 
-              <button
-                type="button"
+                <button
+                  type="button"
 
-                className={
-                  style.cancelAttackButton
-                }
+                  className={
+                    style.cancelAttackButton
+                  }
 
-                disabled={
-                  elixirLoading
-                }
+                  disabled={
+                    elixirLoading
+                  }
 
-                onClick={
-                  closeElixir
-                }
-              >
-                Скасувати
-              </button>
+                  onClick={
+                    closeElixir
+                  }
+                >
+                  Скасувати
+                </button>
+
+              </div>
 
             </div>
 
@@ -3233,9 +3362,6 @@ export const GameMechanicsUI = ({
 
       {
         energyReaction?.active && (
-          energyReaction.can_play_protection ||
-          energyReaction.can_play_ultraprotection
-        ) && (
 
           <div
             className={
@@ -3402,12 +3528,7 @@ export const GameMechanicsUI = ({
                 .can_play_protection && (
 
                   <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "10px",
-                      marginTop: "10px",
-                    }}
+                    className={style.protections}
                   >
 
                     <p
@@ -3444,6 +3565,8 @@ export const GameMechanicsUI = ({
                               .card
                               ?.name
                           }
+
+                          className={style.protectionImg}
                         />
 
                         <strong>
@@ -3451,11 +3574,11 @@ export const GameMechanicsUI = ({
                             protectionHandCard
                               .card
                               ?.name
-                          }
+                          } {" "}
                         </strong>
 
                         <small>
-                          перебиває «{
+                          перебиває  «{
                             currentEnergyCard
                               ?.name
                           }»
@@ -3528,6 +3651,7 @@ export const GameMechanicsUI = ({
                               .card
                               ?.name
                           }
+                          className={style.protectionImg}
                         />
 
                         <strong>
@@ -3537,9 +3661,9 @@ export const GameMechanicsUI = ({
                               ?.name
                           }
                         </strong>
-
+                        {" "}
                         <small>
-                          перебиває «{
+                          перебиває  «{
                             currentEnergyCard
                               ?.name
                           }»
@@ -3579,15 +3703,7 @@ export const GameMechanicsUI = ({
                     ) > 0 && (
 
                         <div
-                          style={{
-                            display: "grid",
-                            gridTemplateColumns:
-                              "repeat(auto-fit, minmax(90px, 1fr))",
-                            gap: "12px",
-                            maxHeight: "42vh",
-                            overflowY: "auto",
-                            padding: "8px 4px",
-                          }}
+                          className={style.listCardBazar}
                         >
 
                           {ultraprotectionDiscardOptions
@@ -3638,6 +3754,8 @@ export const GameMechanicsUI = ({
                                           ? "default"
                                           : "pointer",
                                     }}
+
+
                                   >
 
                                     <img
@@ -3654,14 +3772,8 @@ export const GameMechanicsUI = ({
                                           .card
                                           ?.name
                                       }
+                                      className={style.protectionImg}
 
-                                      style={{
-                                        display: "block",
-                                        width: "100%",
-                                        maxWidth: "110px",
-                                        margin: "0 auto",
-                                        borderRadius: "7px",
-                                      }}
                                     />
 
 
