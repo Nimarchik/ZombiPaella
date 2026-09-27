@@ -94,34 +94,32 @@ const getOpponentPosition = (
   index,
   total
 ) => {
-
   if (total === 1) {
     return "topCenter";
   }
 
   if (total === 2) {
     return [
-      "topRight",
       "topLeft",
+      "topRight",
     ][index];
   }
 
   if (total === 3) {
     return [
-      "rightCenter",
-      "topCenter",
       "leftCenter",
+      "topCenter",
+      "rightCenter",
     ][index];
   }
 
   return [
-    "rightCenter",
-    "topRight",
-    "topLeft",
     "leftCenter",
+    "topLeft",
+    "topRight",
+    "rightCenter",
   ][index];
 };
-
 
 
 const Game = () => {
@@ -930,6 +928,7 @@ const Game = () => {
 
   const opponents =
     useMemo(() => {
+
       if (
         !currentUser?.id ||
         players.length === 0
@@ -937,13 +936,12 @@ const Game = () => {
         return [];
       }
 
-      const sortedPlayers = [
-        ...players,
-      ].sort(
-        (a, b) =>
-          Number(a.seat ?? 0) -
-          Number(b.seat ?? 0)
-      );
+      const sortedPlayers =
+        [...players].sort(
+          (a, b) =>
+            Number(a.seat ?? 0) -
+            Number(b.seat ?? 0)
+        );
 
       const myIndex =
         sortedPlayers.findIndex(
@@ -986,7 +984,6 @@ const Game = () => {
       players,
       currentUser?.id,
     ]);
-
 
 
   const isMyTurn =

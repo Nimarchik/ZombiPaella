@@ -127,6 +127,11 @@ export const GameMechanicsUI = ({
     handlePlaySquib,
     handlePassSquib,
 
+    squibReveal,
+    squibRevealLoading,
+    squibRevealError,
+    handleConfirmSquibReveal,
+
     activeFortresses,
     myFortress,
     fortressLoading,
@@ -5707,6 +5712,185 @@ export const GameMechanicsUI = ({
 
 
       {/* ================================= */}
+      {/* SQUIB / ПЕТАРДА — PRIVATE DEFENDER REVEAL */}
+      {/* ================================= */}
+
+      {
+        squibReveal?.active &&
+        squibReveal?.can_confirm &&
+        gamePhase ===
+        "battle_squib_reveal" && (
+
+          <div
+            className={
+              style.battleOverlay
+            }
+          >
+
+            <div
+              className={
+                style.defenseModal
+              }
+            >
+
+              <h2>
+                🧨 Петарда!
+              </h2>
+
+              <p>
+                Випадково обрано карти,
+                які зараз будуть скинуті
+                з твоєї руки.
+              </p>
+
+
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  flexWrap: "wrap",
+                  gap: "14px",
+                  margin: "20px 0",
+                }}
+              >
+
+                {(
+                  Array.isArray(
+                    squibReveal.cards
+                  )
+                    ? squibReveal.cards
+                    : []
+                ).map(
+                  card => (
+
+                    <button
+                      key={
+                        card.game_card_id
+                      }
+                      type="button"
+                      onClick={() =>
+                        setPreviewCard({
+                          id:
+                            card.definition_id,
+                          name:
+                            card.name,
+                          type:
+                            card.type,
+                          subtype:
+                            card.subtype,
+                          attack:
+                            card.attack,
+                          defense:
+                            card.defense,
+                          power:
+                            card.power,
+                          image_path:
+                            card.image_path,
+                          gameCardId:
+                            card.game_card_id,
+                        })
+                      }
+                      style={{
+                        border: "1px solid rgba(255,255,255,.18)",
+                        borderRadius: "12px",
+                        padding: "10px",
+                        background: "rgba(0,0,0,.22)",
+                        color: "inherit",
+                        cursor: "pointer",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+
+                      <img
+                        src={
+                          getCardImageUrl(
+                            card.image_path
+                          )
+                        }
+                        alt={
+                          card.name
+                        }
+                        style={{
+                          width: "135px",
+                          maxWidth: "36vw",
+                          borderRadius: "9px",
+                          boxShadow:
+                            "0 10px 26px rgba(0,0,0,.38)",
+                        }}
+                      />
+
+                      <strong
+                        style={{
+                          maxWidth: "150px",
+                          textAlign: "center",
+                        }}
+                      >
+                        {card.name}
+                      </strong>
+
+                    </button>
+
+                  )
+                )}
+
+              </div>
+
+
+              <p
+                className={
+                  style.headerSub
+                }
+              >
+                Після підтвердження ці карти
+                підуть у скид, а потім ти
+                обереш захист у битві.
+              </p>
+
+
+              <button
+                type="button"
+                className={
+                  style.confirmDefenseButton
+                }
+                disabled={
+                  squibRevealLoading
+                }
+                onClick={
+                  handleConfirmSquibReveal
+                }
+              >
+                {
+                  squibRevealLoading
+                    ? "Скидаємо..."
+                    : "Зрозуміло — скинути карти"
+                }
+              </button>
+
+
+              {squibRevealError && (
+
+                <p
+                  className={
+                    style.battleError
+                  }
+                >
+                  {squibRevealError}
+                </p>
+
+              )}
+
+            </div>
+
+          </div>
+
+        )
+      }
+
+
+      {/* ================================= */}
       {/* SQUIB / ПЕТАРДА — ATTACKER DECISION */}
       {/* ================================= */}
 
@@ -5930,13 +6114,12 @@ export const GameMechanicsUI = ({
 
 
       {/* ================================= */}
-      {/* ATTACKER WAITING */}
+      {/* BATTLE PUBLIC STATUS */}
       {/* ================================= */}
-
 
       {
         activeBattle &&
-        iAmAttacker &&
+        !iAmDefender &&
         gamePhase ===
         "battle_waiting_defense" && (
 
@@ -5947,16 +6130,26 @@ export const GameMechanicsUI = ({
           >
 
             <span>
-              ⚔ Ти атакуєш
+              {iAmAttacker
+                ? "⚔ Ти атакуєш"
+                : `⚔ ${getPlayerName(
+                  activeBattle.attacker_id
+                )} атакує ${getPlayerName(
+                  activeBattle.defender_id
+                )}`
+              }
             </span>
+
 
             {battleTargetTreasure && (
 
               <button
                 type="button"
+
                 className={
                   style.waitingBattleTarget
                 }
+
                 onClick={() =>
                   setPreviewCard({
                     ...battleTargetTreasure.card,
@@ -5976,6 +6169,7 @@ export const GameMechanicsUI = ({
                       .card
                       ?.image_path
                   )}
+
                   alt={
                     battleTargetTreasure
                       .card
@@ -5995,15 +6189,18 @@ export const GameMechanicsUI = ({
 
             )}
 
+
             <span>
-              Очікуємо рішення суперника...
+              {iAmAttacker
+                ? "Очікуємо рішення суперника..."
+                : "Очікуємо рішення захисника..."
+              }
             </span>
 
           </div>
 
         )
       }
-
 
       {/* ================================= */}
       {/* DEFENDER WINDOW */}

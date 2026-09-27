@@ -576,6 +576,182 @@ export const useGameMechanics = ({
   ] = useState(null);
 
 
+  const [
+    squibReveal,
+    setSquibReveal,
+  ] = useState(null);
+
+  const [
+    squibRevealLoading,
+    setSquibRevealLoading,
+  ] = useState(false);
+
+  const [
+    squibRevealError,
+    setSquibRevealError,
+  ] = useState("");
+
+
+
+  // =========================================================
+  // SQUIB — PRIVATE REVEAL FOR DEFENDER
+  // =========================================================
+
+  const loadSquibReveal =
+    useCallback(
+      async () => {
+
+        if (
+          !game?.id ||
+          !currentUser?.id ||
+          game?.phase !==
+          "battle_squib_reveal"
+        ) {
+          setSquibReveal(null);
+          return null;
+        }
+
+
+        const {
+          data,
+          error,
+        } =
+          await supabase.rpc(
+            "get_active_squib_reveal",
+            {
+              p_game_id: game.id,
+            }
+          );
+
+
+        if (error) {
+
+          console.error(
+            "GET SQUIB REVEAL ERROR:",
+            error
+          );
+
+          setSquibRevealError(
+            error.message
+          );
+
+          setSquibReveal(null);
+          return null;
+        }
+
+
+        const reveal =
+          data?.active
+            ? data
+            : null;
+
+
+        setSquibReveal(
+          reveal
+        );
+
+        return reveal;
+      },
+      [
+        game?.id,
+        game?.phase,
+        currentUser?.id,
+      ]
+    );
+
+
+  useEffect(() => {
+
+    setSquibRevealError("");
+
+
+    if (
+      game?.phase ===
+      "battle_squib_reveal"
+    ) {
+      loadSquibReveal();
+    } else {
+      setSquibReveal(null);
+    }
+
+  }, [
+    game?.phase,
+    activeBattle?.id,
+    loadSquibReveal,
+  ]);
+
+
+  const handleConfirmSquibReveal =
+    async () => {
+
+      if (
+        !game?.id ||
+        !currentUser?.id ||
+        !squibReveal?.active ||
+        !squibReveal?.can_confirm ||
+        squibRevealLoading
+      ) {
+        return;
+      }
+
+
+      setSquibRevealLoading(true);
+      setSquibRevealError("");
+
+
+      const {
+        data,
+        error,
+      } =
+        await supabase.rpc(
+          "confirm_squib_reveal",
+          {
+            p_game_id: game.id,
+          }
+        );
+
+
+      if (error) {
+
+        console.error(
+          "CONFIRM SQUIB REVEAL ERROR:",
+          error
+        );
+
+        setSquibRevealError(
+          error.message
+        );
+
+        setSquibRevealLoading(false);
+        return;
+      }
+
+
+      console.log(
+        "SQUIB REVEAL CONFIRMED:",
+        data
+      );
+
+
+      setSquibReveal(null);
+
+
+      await refreshCards(
+        game.id,
+        currentUser.id
+      );
+
+      await loadActiveBattle(
+        game.id
+      );
+
+      await loadGameState();
+
+
+      setSquibRevealLoading(false);
+    };
+
+
   // =========================================================
   // FORTRESS — ОБОРОННА ФОРТЕЦЯ
   // =========================================================
@@ -6065,6 +6241,19 @@ export const useGameMechanics = ({
 
             } else if (
               phase ===
+              "battle_squib_reveal"
+            ) {
+
+              setBattleReaction(null);
+              setEnergyReaction(null);
+              setBattleGuardChoice(null);
+              setSpyReveal(null);
+              setUltraprotectionDiscardIds([]);
+
+              await loadSquibReveal();
+
+            } else if (
+              phase ===
               "battle_waiting_defense"
             ) {
 
@@ -6072,6 +6261,7 @@ export const useGameMechanics = ({
               setEnergyReaction(null);
               setBattleGuardChoice(null);
               setUltraprotectionDiscardIds([]);
+              setSquibReveal(null);
 
               await loadSpyReveal();
 
@@ -6081,6 +6271,7 @@ export const useGameMechanics = ({
               setEnergyReaction(null);
               setBattleGuardChoice(null);
               setSpyReveal(null);
+              setSquibReveal(null);
               setUltraprotectionDiscardIds([]);
 
             }
@@ -6112,6 +6303,7 @@ export const useGameMechanics = ({
     loadEnergyReaction,
     loadBattleGuardChoice,
     loadSpyReveal,
+    loadSquibReveal,
     refreshCards,
     loadGameState,
     loadFortresses,
@@ -6817,6 +7009,12 @@ export const useGameMechanics = ({
     canPlaySquib,
     handlePlaySquib,
     handlePassSquib,
+
+    squibReveal,
+    squibRevealLoading,
+    squibRevealError,
+    loadSquibReveal,
+    handleConfirmSquibReveal,
 
 
     // fortress
