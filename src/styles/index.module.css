@@ -922,7 +922,7 @@ ol {
 .deckArea {
   position: absolute;
   right: 60%;
-  top: 45%;
+  top: 50%;
   transform: translate(-50%, -50%);
   z-index: 30;
   display: flex;
@@ -2816,7 +2816,7 @@ ol {
 
 .listCardBazar {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 12px;
   max-height: 42vh;
   overflow-y: auto;

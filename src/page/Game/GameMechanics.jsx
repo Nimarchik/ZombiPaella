@@ -2,6 +2,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -79,6 +80,28 @@ export const useGameMechanics = ({
   setPreviewCard,
   setAlmsMenuOpen,
 }) => {
+
+
+  // =========================================================
+  // REALTIME COALESCING
+  //
+  // Several SQL actions can update games/game_cards/game_battles
+  // almost at the same time. We keep every realtime signal, but
+  // merge their follow-up reads into one short 140 ms refresh.
+  // =========================================================
+
+  const realtimeSyncTimerRef =
+    useRef(null);
+
+  const realtimeSyncPendingRef =
+    useRef({
+      cards: false,
+      game: false,
+      fortresses: false,
+      statues: false,
+      battle: false,
+      guardChoice: false,
+    });
 
 
   // =========================================================
@@ -1845,88 +1868,6 @@ export const useGameMechanics = ({
   ]);
 
 
-  // =========================================================
-  // FORTRESS REALTIME SYNC
-  //
-  // Game.jsx already listens to game_cards for regular cards,
-  // but active Fortresses live in their own state here.
-  // Refresh this public state for EVERY player whenever a
-  // Fortress card changes zone.
-  // =========================================================
-
-  useEffect(() => {
-
-    if (
-      !game?.id ||
-      !currentUser?.id
-    ) {
-      return;
-    }
-
-
-    const gameId =
-      game.id;
-
-
-    const channel =
-      supabase
-        .channel(
-          `fortress-sync-${gameId}-${currentUser.id}`
-        )
-        .on(
-          "postgres_changes",
-          {
-            event: "UPDATE",
-            schema: "public",
-            table: "game_cards",
-            filter:
-              `game_id=eq.${gameId}`,
-          },
-          async payload => {
-
-            const definitionId =
-              payload.new?.definition_id ??
-              payload.old?.definition_id;
-
-
-            if (
-              definitionId ===
-              "fortress"
-            ) {
-              await loadFortresses();
-            }
-          }
-        )
-        .on(
-          "postgres_changes",
-          {
-            event: "UPDATE",
-            schema: "public",
-            table: "games",
-            filter:
-              `id=eq.${gameId}`,
-          },
-          async () => {
-            // Fallback signal. play_fortress() intentionally
-            // updates games even though the turn stays the same.
-            await loadFortresses();
-          }
-        )
-        .subscribe();
-
-
-    return () => {
-      supabase.removeChannel(
-        channel
-      );
-    };
-
-  }, [
-    game?.id,
-    currentUser?.id,
-    loadFortresses,
-  ]);
-
 
   const myFortress =
     useMemo(
@@ -2086,78 +2027,9 @@ export const useGameMechanics = ({
       ]
     );
 
-
   useEffect(() => {
     loadStatues();
   }, [
-    loadStatues,
-  ]);
-
-
-  useEffect(() => {
-
-    if (
-      !game?.id ||
-      !currentUser?.id
-    ) {
-      return;
-    }
-
-    const gameId =
-      game.id;
-
-    const channel =
-      supabase
-        .channel(
-          `statue-sync-${gameId}-${currentUser.id}`
-        )
-        .on(
-          "postgres_changes",
-          {
-            event: "UPDATE",
-            schema: "public",
-            table: "game_cards",
-            filter:
-              `game_id=eq.${gameId}`,
-          },
-          async payload => {
-
-            const definitionId =
-              payload.new?.definition_id ??
-              payload.old?.definition_id;
-
-            if (
-              definitionId ===
-              "statue"
-            ) {
-              await loadStatues();
-            }
-          }
-        )
-        .on(
-          "postgres_changes",
-          {
-            event: "UPDATE",
-            schema: "public",
-            table: "games",
-            filter:
-              `id=eq.${gameId}`,
-          },
-          async () => {
-            await loadStatues();
-          }
-        )
-        .subscribe();
-
-    return () => {
-      supabase.removeChannel(
-        channel
-      );
-    };
-
-  }, [
-    game?.id,
-    currentUser?.id,
     loadStatues,
   ]);
 
@@ -3025,13 +2897,16 @@ export const useGameMechanics = ({
     );
 
 
-  // Reload on every refreshed game object. This is important because
-  // during a Double Action chain current_player_id may stay unchanged
-  // while actions_remaining goes 2 -> 1.
+  // Reload only when the server game row actually changes.
+  // updated_at also covers Double Action 2 -> 1 while the same
+  // player and phase remain active.
   useEffect(() => {
     loadTurnActionState();
   }, [
-    game,
+    game?.id,
+    game?.phase,
+    game?.current_player_id,
+    game?.updated_at,
     loadTurnActionState,
   ]);
 
@@ -5093,6 +4968,35 @@ export const useGameMechanics = ({
   ] = useState(0);
 
 
+  const myIngredientSyncKey =
+    useMemo(
+      () =>
+        treasures
+          .filter(
+            treasure =>
+              treasure.owner_id ===
+              currentUser?.id
+          )
+          .map(
+            treasure =>
+              [
+                treasure.id,
+                treasure.zone ?? "",
+                treasure.card?.id ?? "",
+                treasure.card?.is_ingredient
+                  ? "1"
+                  : "0",
+              ].join(":")
+          )
+          .sort()
+          .join("|"),
+      [
+        treasures,
+        currentUser?.id,
+      ]
+    );
+
+
   const loadMyIngredientCount =
     useCallback(
       async () => {
@@ -5156,7 +5060,7 @@ export const useGameMechanics = ({
       [
         game?.id,
         currentUser?.id,
-        treasures,
+        myIngredientSyncKey,
       ]
     );
 
@@ -5164,7 +5068,9 @@ export const useGameMechanics = ({
   useEffect(() => {
     loadMyIngredientCount();
   }, [
-    loadMyIngredientCount,
+    game?.id,
+    currentUser?.id,
+    myIngredientSyncKey,
   ]);
 
 
@@ -6126,6 +6032,286 @@ export const useGameMechanics = ({
 
 
   // =========================================================
+  // COALESCED REALTIME REFRESH
+  //
+  // All clients still receive every server signal. The only
+  // optimization is that signals arriving within 140 ms share
+  // one batch of follow-up reads.
+  // =========================================================
+
+  const scheduleRealtimeSync =
+    useCallback(
+      options => {
+
+        if (
+          !game?.id ||
+          !currentUser?.id
+        ) {
+          return;
+        }
+
+
+        const requested =
+          options ?? {};
+
+
+        realtimeSyncPendingRef.current = {
+          ...realtimeSyncPendingRef.current,
+
+          cards:
+            realtimeSyncPendingRef.current.cards ||
+            Boolean(requested.cards),
+
+          game:
+            realtimeSyncPendingRef.current.game ||
+            Boolean(requested.game),
+
+          fortresses:
+            realtimeSyncPendingRef.current.fortresses ||
+            Boolean(requested.fortresses),
+
+          statues:
+            realtimeSyncPendingRef.current.statues ||
+            Boolean(requested.statues),
+
+          battle:
+            realtimeSyncPendingRef.current.battle ||
+            Boolean(requested.battle),
+
+          guardChoice:
+            realtimeSyncPendingRef.current.guardChoice ||
+            Boolean(requested.guardChoice),
+        };
+
+
+        if (
+          realtimeSyncTimerRef.current
+        ) {
+          clearTimeout(
+            realtimeSyncTimerRef.current
+          );
+        }
+
+
+        realtimeSyncTimerRef.current =
+          setTimeout(
+            async () => {
+
+              const pending = {
+                ...realtimeSyncPendingRef.current,
+              };
+
+
+              realtimeSyncPendingRef.current = {
+                cards: false,
+                game: false,
+                fortresses: false,
+                statues: false,
+                battle: false,
+                guardChoice: false,
+              };
+
+
+              realtimeSyncTimerRef.current =
+                null;
+
+
+              const jobs = [];
+
+
+              if (pending.cards) {
+                jobs.push(
+                  refreshCards(
+                    game.id,
+                    currentUser.id
+                  )
+                );
+              }
+
+
+              if (pending.game) {
+                jobs.push(
+                  loadGameState()
+                );
+              }
+
+
+              if (pending.fortresses) {
+                jobs.push(
+                  loadFortresses()
+                );
+              }
+
+
+              if (pending.statues) {
+                jobs.push(
+                  loadStatues()
+                );
+              }
+
+
+              if (pending.battle) {
+                jobs.push(
+                  loadActiveBattle(
+                    game.id
+                  )
+                );
+              }
+
+
+              if (pending.guardChoice) {
+                jobs.push(
+                  loadBattleGuardChoice()
+                );
+              }
+
+
+              if (jobs.length > 0) {
+                await Promise.allSettled(
+                  jobs
+                );
+              }
+
+            },
+            140
+          );
+
+      },
+      [
+        game?.id,
+        currentUser?.id,
+        refreshCards,
+        loadGameState,
+        loadFortresses,
+        loadStatues,
+        loadActiveBattle,
+        loadBattleGuardChoice,
+      ]
+    );
+
+
+  useEffect(() => {
+
+    return () => {
+
+      if (
+        realtimeSyncTimerRef.current
+      ) {
+        clearTimeout(
+          realtimeSyncTimerRef.current
+        );
+      }
+
+
+      realtimeSyncPendingRef.current = {
+        cards: false,
+        game: false,
+        fortresses: false,
+        statues: false,
+        battle: false,
+        guardChoice: false,
+      };
+
+    };
+
+  }, [
+    game?.id,
+  ]);
+
+
+  // =========================================================
+  // PERSISTENT CARD REALTIME
+  //
+  // Fortress/Statue must be visible to EVERY player. We keep a
+  // direct game_cards listener, but only refresh the affected
+  // public state. A games UPDATE remains the fallback below in
+  // the reaction channel.
+  // =========================================================
+
+  useEffect(() => {
+
+    if (
+      !game?.id ||
+      !currentUser?.id
+    ) {
+      return;
+    }
+
+
+    const gameId =
+      game.id;
+
+
+    const channel =
+      supabase
+        .channel(
+          `persistent-cards-${gameId}-${currentUser.id}`
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "game_cards",
+            filter:
+              `game_id=eq.${gameId}`,
+          },
+
+          payload => {
+
+            const definitionId =
+              payload.new?.definition_id ??
+              payload.old?.definition_id;
+
+
+            if (
+              definitionId ===
+              "fortress"
+            ) {
+              scheduleRealtimeSync({
+                fortresses: true,
+                cards: true,
+              });
+              return;
+            }
+
+
+            if (
+              definitionId ===
+              "statue"
+            ) {
+              scheduleRealtimeSync({
+                statues: true,
+                cards: true,
+              });
+              return;
+            }
+
+
+            // Any other moved card still has to become visible on
+            // the other clients, but it does not need guard RPCs.
+            scheduleRealtimeSync({
+              cards: true,
+            });
+          }
+        )
+        .subscribe();
+
+
+    return () => {
+      supabase.removeChannel(
+        channel
+      );
+    };
+
+  }, [
+    game?.id,
+    currentUser?.id,
+    scheduleRealtimeSync,
+  ]);
+
+
+  // =========================================================
   // REACTION REALTIME
   //
   // SQL навмисно робить UPDATE games навіть коли phase
@@ -6242,11 +6428,18 @@ export const useGameMechanics = ({
             }
 
 
-            await refreshAfterSpecialAction();
-
-            await loadGameState();
-            await loadFortresses();
-            await loadStatues();
+            // Keep every client synchronized, including persistent
+            // cards such as Fortress/Statue. Multiple SQL UPDATEs
+            // arriving together are collapsed into one refresh.
+            scheduleRealtimeSync({
+              cards: true,
+              game: true,
+              fortresses: true,
+              statues: true,
+              guardChoice:
+                phase ===
+                "battle_guard_choice",
+            });
           }
         )
         .subscribe();
@@ -6266,10 +6459,7 @@ export const useGameMechanics = ({
     loadBattleGuardChoice,
     loadSpyReveal,
     loadSquibReveal,
-    refreshCards,
-    loadGameState,
-    loadFortresses,
-    loadStatues,
+    scheduleRealtimeSync,
   ]);
 
 
@@ -6714,16 +6904,14 @@ export const useGameMechanics = ({
             }
 
 
-            await loadActiveBattle(
-              gameId
-            );
-
-            await refreshAfterSpecialAction();
-
-            await loadGameState();
-            await loadFortresses();
-            await loadStatues();
-            await loadBattleGuardChoice();
+            scheduleRealtimeSync({
+              battle: true,
+              cards: true,
+              game: true,
+              fortresses: true,
+              statues: true,
+              guardChoice: true,
+            });
           }
         )
 
@@ -6739,14 +6927,9 @@ export const useGameMechanics = ({
   }, [
     game?.id,
     currentUser?.id,
-    loadActiveBattle,
-    refreshCards,
-    loadGameState,
     loadBattleResult,
     setActiveBattle,
-    loadFortresses,
-    loadStatues,
-    loadBattleGuardChoice,
+    scheduleRealtimeSync,
   ]);
 
   const battleTargetTreasure =

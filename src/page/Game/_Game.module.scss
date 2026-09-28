@@ -567,7 +567,7 @@
 
   right: 60%;
 
-  top: 45%;
+  top: 50%;
 
   transform: translate(-50%, -50%);
 
@@ -4044,7 +4044,7 @@
 .listCardBazar {
   display: grid;
   grid-template-columns: repeat(auto-fit,
-      minmax(90px, 1fr));
+      minmax(150px, 1fr));
   gap: 12px;
   max-height: 42vh;
   overflow-y: auto;
